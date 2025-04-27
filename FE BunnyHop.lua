@@ -12,10 +12,14 @@ local Configuration = {
 	AutoBHop = true;
 	JumpPower = 40;
 	ForceReset = 0.275;
-	ForceMultiplier = 50;
-	JumpCooldown = 0.125
+	ForceMultiplier = 1.5;
+	ForceLimit = 250;
+	JumpCooldown = 0.125;
+	AirAcceleration = 70
 }
 
+local LastLook = HRP.CFrame.LookVector
+local AirMultiplier = 0
 local JumpCount = 0
 local JumpDebounce = false
 local IsOnGround = false
@@ -43,7 +47,7 @@ UserInputService.JumpRequest:Connect(function()
 	else
 		Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
 	end
-	
+
 	JumpDebounce = true
 	task.delay(Configuration.JumpCooldown, function()
 		JumpDebounce = false
@@ -54,6 +58,7 @@ local ResetForce = function(Active: boolean)
 	if Active then
 		ResetTask = task.delay(Configuration.ForceReset, function()
 			JumpCount = 0
+			AirMultiplier = 0
 		end)
 	else
 		if ResetTask then
@@ -65,22 +70,30 @@ end
 
 Humanoid.StateChanged:Connect(function(Old, New)
 	if New == Enum.HumanoidStateType.Jumping then
+		Humanoid.HipHeight = 1
 		JumpCount += 1
-		
+
 		HopTrack:Play(5, 5, 10)
 		IsOnGround = false
 		ResetForce(false)
 		BHopVelocity.Parent = HRP
 	elseif New == Enum.HumanoidStateType.Landed then
+		Humanoid.HipHeight = 0
+		
 		HopTrack:Stop()
 		IsOnGround = true
 		ResetForce(true)
 		BHopVelocity.Parent = nil
+	elseif New == Enum.HumanoidStateType.Freefall then
+		AirMultiplier += (LastLook - HRP.CFrame.LookVector).Magnitude * Configuration.AirAcceleration
 	end
 end)
 
-RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()	
 	if BHopVelocity.Parent then
-		BHopVelocity.Velocity = (Humanoid.MoveDirection.Magnitude > 0 and not IsOnGround) and HRP.CFrame.LookVector * (Configuration.ForceMultiplier + JumpCount) or Vector3.zero
+		local Multiplier = math.clamp(Configuration.ForceMultiplier + AirMultiplier + JumpCount, 1, Configuration.ForceLimit)
+		BHopVelocity.Velocity = HRP.CFrame.LookVector * Multiplier
 	end
+	
+	LastLook = HRP.CFrame.LookVector
 end)
