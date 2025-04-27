@@ -6,7 +6,9 @@ local Config = {
 	MinDistance = 10;
 	RopeThickness = 0.5;
 	RopeMultiplier = 10;
-	Power = 7
+	Power = 100;
+	RightKey = Enum.KeyCode.E;
+	LeftKey = Enum.KeyCode.Q;
 }
 
 local Players = game:GetService("Players")
@@ -41,7 +43,7 @@ function UpdateRope(Side: string, Toggle: boolean)
 		RopeSystems[Side].Rope:Destroy()
 		RopeSystems[Side].Rope = nil
 	end
-	
+
 	if Toggle then
 		local HitPart = Mouse.Target
 		local HitCF = Mouse.Hit
@@ -49,7 +51,7 @@ function UpdateRope(Side: string, Toggle: boolean)
 		local Distance = (HitPos - HumanoidRootPart.CFrame.Position).Magnitude
 
 		if not HitPart or Distance > Config.MaxDistance then return end
-		
+
 		local WorldAttachment = CreateAttachment(HitPart, HitPart.CFrame:PointToObjectSpace(HitPos))
 		local NewRope = Instance.new("RopeConstraint")
 		NewRope.Length = Distance * 1.25
@@ -77,18 +79,18 @@ end
 UserInputService.InputBegan:Connect(function(Input: InputObject, GameProcessed: boolean)
 	if GameProcessed then return end
 
-	if Input.KeyCode == Enum.KeyCode.Q then
+	if Input.KeyCode == Config.LeftKey then
 		UpdateRope("Left", true)
-	elseif Input.KeyCode == Enum.KeyCode.E then
+	elseif Input.KeyCode == Config.RightKey then
 		UpdateRope("Right", true)
 	end
 end)
 UserInputService.InputEnded:Connect(function(Input: InputObject, GameProcessed: boolean)
 	if GameProcessed then return end
 
-	if Input.KeyCode == Enum.KeyCode.Q then
+	if Input.KeyCode == Config.LeftKey then
 		UpdateRope("Left", false)
-	elseif Input.KeyCode == Enum.KeyCode.E then
+	elseif Input.KeyCode == Config.RightKey then
 		UpdateRope("Right", false)
 	end
 end)
