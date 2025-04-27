@@ -1,9 +1,7 @@
 local FlyConfiguration = {
 	Key = Enum.KeyCode.Q;
 	Speed = 100;
-	FOV = 100;
-	Sway = 0.5;
-	SwayAngle = 5
+	FOV = 110;
 }
 
 local RunService = game:GetService("RunService")
@@ -53,32 +51,6 @@ local function GetMovementDirection(): Vector3
 	return worldDirection == Vector3.zero and worldDirection or worldDirection.Unit
 end
 
-local function UpdateCameraSway(deltaTime: number)
-	if not IsFlying then
-		CurrentSwayAngle = 0
-		MovementSwayAngle = 0
-		return
-	end
-
-	local CurrentLookVector = Camera.CFrame.LookVector
-	local LookVectorChange = (CurrentLookVector - LastLookVector).Magnitude
-	LastLookVector = CurrentLookVector
-
-	local CurrentMoveVector = GetMovementDirection()
-	local MoveVectorChange = (CurrentMoveVector - LastMoveVector).Magnitude
-	LastMoveVector = CurrentMoveVector
-
-	local LookSway = math.clamp(LookVectorChange * 500 * FlyConfiguration.Sway, -FlyConfiguration.SwayAngle, FlyConfiguration.SwayAngle)
-	local MoveSway = math.clamp(MoveVectorChange * 500, -FlyConfiguration.SwayAngle, FlyConfiguration.SwayAngle)
-
-	CurrentSwayAngle = CurrentSwayAngle + (LookSway - CurrentSwayAngle) * (10 * deltaTime)
-	MovementSwayAngle = MovementSwayAngle + (MoveSway - MovementSwayAngle) * deltaTime
-
-	local TotalSway = CurrentSwayAngle + MovementSwayAngle
-
-	Camera.CFrame = Camera.CFrame * CFrame.Angles(0, 0, math.rad(TotalSway))
-end
-
 local function SetFlyingState(Toggle: boolean)
 	IsFlying = Toggle
 
@@ -118,8 +90,6 @@ FlyMoving:GetPropertyChangedSignal("Value"):Connect(function()
 end)
 
 RunService.RenderStepped:Connect(function(deltaTime: number)
-	UpdateCameraSway(deltaTime)
-
 	if IsFlying then
 		Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
 		BodyGyro.CFrame = Camera.CFrame
