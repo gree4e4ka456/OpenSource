@@ -1,4 +1,4 @@
--- made on swift executor
+-- free further extend. made on swift executor
 
 local CONFIGURATION = {
     RANGE = 40;
