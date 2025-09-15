@@ -1,6 +1,7 @@
+-- made on swift executor
+
 local CONFIGURATION = {
     RANGE = 40;
-    ESCAPE = 4;
 }
 
 local UserInputService = game:GetService("UserInputService")
@@ -23,21 +24,6 @@ Player.CharacterAdded:Connect(function(Character)
             end
         end)
         task.wait()
-    end
-end)
-
-UserInputService.InputBegan:Connect(function(Input, GPE)
-    if GPE then return end
-    
-    if Input.KeyCode == Enum.KeyCode.Z then
-        local Character = Player.Character
-        local RootPart = (Character) and Character:FindFirstChild("HumanoidRootPart")
-        if RootPart then
-            RootPart.AssemblyLinearVelocity = Vector3.zero
-            RootPart.AssemblyAngularVelocity = Vector3.zero
-        end
-    elseif Player.IsHeld.Value and Input.KeyCode == Enum.KeyCode.Space then -- TODO: fix this bullshit
-        ReplicatedStorage.CharacterEvents.Struggle:FireServer()
     end
 end)
 
